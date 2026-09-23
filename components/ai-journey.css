@@ -1,9 +1,9 @@
 body{background:#f8f9fa;isolation:isolate}
 .site-ambient{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse 58% 43% at 51% 57%,rgba(157,163,170,.29),rgba(209,213,218,.16) 46%,transparent 78%),#f8f9fa}
-.site-ambient .pointer-glow{position:absolute;left:0;top:0;width:clamp(300px,36vw,650px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(183,193,205,.25),rgba(198,205,214,.11) 37%,transparent 72%);filter:blur(22px);opacity:0;transform:translate3d(-100%, -100%, 0);will-change:transform,opacity;transition:opacity .28s ease}
+.site-ambient .pointer-glow{position:absolute;left:0;top:0;width:clamp(340px,40vw,700px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(105,132,162,.48) 0%,rgba(139,161,185,.34) 28%,rgba(169,185,203,.17) 52%,transparent 76%);filter:blur(14px);opacity:0;transform:translate3d(-100%, -100%, 0);will-change:transform,opacity;transition:opacity .22s ease}
 .site-ambient .pointer-glow.is-active{opacity:1}
 .pointer-trails{position:absolute;inset:0}
-.pointer-trails .trail-dot{position:absolute;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(153,171,191,.22),rgba(174,184,196,.09) 45%,transparent 73%);filter:blur(11px);transform:translate(-50%,-50%);animation:ambient-trail .72s ease-out both}
+.pointer-trails .trail-dot{position:absolute;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(107,135,165,.38),rgba(148,168,191,.18) 46%,transparent 74%);filter:blur(9px);transform:translate(-50%,-50%);animation:ambient-trail .82s ease-out both}
 .ambient-dragging *{user-select:none!important;-webkit-user-select:none!important}
 @keyframes ambient-trail{from{opacity:.9;scale:1}to{opacity:0;scale:.25}}
 main,footer{position:relative;z-index:1}
