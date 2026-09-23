@@ -1,0 +1,1 @@
+require('esbuild').buildSync({entryPoints:['components/mount.jsx'],bundle:true,minify:true,jsx:'automatic',format:'iife',outfile:'assets/components.js',define:{'process.env.NODE_ENV':'"production"'}});
