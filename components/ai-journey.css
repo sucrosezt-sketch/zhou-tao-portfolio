@@ -46,3 +46,45 @@ main,footer{position:relative;z-index:1}
 .detail-back-section p{margin:0!important;font-size:14px;line-height:1.9;color:#4f5962!important}
 .detail-back-footer{border-top:1px solid #d6d9dc;padding-top:15px;color:#5d6770;font-size:11px;letter-spacing:.12em}
 @media(max-width:760px){.site-ambient .pointer-glow{width:300px}.ai-history{gap:13px;margin-bottom:58px}.ai-phase{display:block;padding:22px;border-radius:14px}.ai-phase-meta{display:flex;flex-direction:row;justify-content:space-between;gap:12px;margin-bottom:15px}.ai-phase-meta span{font-size:9px}.ai-phase-meta time{font-size:11px}.ai-phase-body h3{font-size:23px;margin-bottom:15px}.ai-phase-body p{display:block;font-size:13px}.ai-phase-body strong{display:block;font-size:11px;margin-bottom:2px}.ai-phase-body p+p{margin-top:13px}.ai-method-heading{display:block}.ai-method-heading p{margin-top:3px}.detail-back-section{display:block;padding:7px 0}.detail-back-section h4{font-size:11px;margin-bottom:3px}.detail-back-section p{font-size:13px}.detail-back-header h3{font-size:25px}}
+
+/* Each project image and its description share one vertical frame on desktop. */
+@media(min-width:1051px){
+  .project:has(> .single-image-card){--detail-pair-height:clamp(620px,72vh,740px);align-items:stretch}
+  .project:has(> .single-image-card)>.project-visual.single-image-card{position:relative;top:auto;align-self:stretch;display:flex;min-height:var(--detail-pair-height)}
+  .project:has(> .single-image-card) .single-image-card .zoom-image{display:flex;flex-direction:column;min-height:0;height:100%}
+  .project:has(> .single-image-card) .single-image-card .zoom-image img{flex:1 1 auto;width:100%;height:0;min-height:0;max-height:none;object-fit:contain}
+  .project:has(> .single-image-card) .single-image-card .zoom-image>span{flex:0 0 auto;margin-top:18px}
+  .project:has(> .single-image-card)>.project-copy{padding-top:0;display:flex;flex-direction:column}
+  .project:has(> .single-image-card) .official-detail{min-height:var(--detail-pair-height);flex:1}
+  .project:has(> .single-image-card) .official-detail .flip-card{height:max(var(--fc-h),var(--detail-pair-height))}
+  .project:has(> .single-image-card)>.static-project-card{min-height:var(--detail-pair-height)}
+  .project:has(> .single-image-card)>.static-project-card .outline-label{margin-top:auto}
+  .project:has(> .frame-gallery)>.project-copy{padding-top:0}
+}
+
+.official-detail .detail-content{display:flex;flex-direction:column;height:100%}
+.official-detail .detail-main{flex:1;min-height:0}
+.official-detail .detail-content--back>.detail-main{display:flex;flex-direction:column}
+.official-detail .detail-card-footer{display:flex;align-items:center;justify-content:space-between;gap:15px;flex:0 0 auto;margin-top:22px;padding-top:15px;border-top:1px solid #d6d9dc;font-size:14px;font-weight:600;line-height:1.5}
+.official-detail .detail-card-footer i{font:normal 24px/1 sans-serif}
+.official-detail .measure-face .detail-content{height:auto}
+.official-detail .measure-face .detail-main{flex:none}
+
+/* The work-method card discloses a second card below it without replacing its front. */
+.method-grid[role="button"]{padding:34px;border:1px solid #e2e4e7;border-radius:16px;background:rgba(255,255,255,.58);box-shadow:0 14px 42px #515c6a0b;cursor:pointer;transition:background .25s ease,box-shadow .25s ease,transform .25s ease}
+.method-grid[role="button"]:hover{background:rgba(255,255,255,.78);box-shadow:0 20px 50px #515c6a18;transform:translateY(-2px)}
+.method-grid[role="button"]:focus-visible{outline:3px solid #73849a;outline-offset:5px}
+.method-card-prompt{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;padding-top:22px;margin-top:4px;border-top:1px solid #d6d9dc;font-size:14px;font-weight:600;color:#303840}
+.method-card-icon{font-size:25px;font-weight:400;line-height:1;transition:transform .3s ease}
+.method-grid[aria-expanded="true"] .method-card-icon{transform:rotate(45deg)}
+.method-drawer{display:grid;grid-template-rows:0fr;opacity:0;margin-top:0;transition:grid-template-rows .36s cubic-bezier(.22,.61,.36,1),opacity .28s ease,margin-top .36s ease}
+.method-drawer.is-open{grid-template-rows:1fr;opacity:1;margin-top:14px}
+.method-drawer-inner{min-height:0;overflow:hidden;padding:0 34px;border:1px solid transparent;border-radius:16px;background:rgba(255,255,255,.76);box-shadow:0 16px 40px #515c6a0d;color:#525b63;font-size:15px;line-height:1.9;transition:padding .36s ease,border-color .36s ease}
+.method-drawer:not(.is-open) .method-drawer-inner{border-width:0}
+.method-drawer.is-open .method-drawer-inner{padding-block:28px;border-color:#e2e4e7}
+.method-drawer-inner p+p{margin-top:14px}
+@media(max-width:760px){.method-grid[role="button"]{padding:23px}.method-card-prompt{margin-top:0;padding-top:18px;font-size:13px}.method-drawer-inner{padding-inline:23px;font-size:14px}.method-drawer.is-open .method-drawer-inner{padding-block:22px}}
+
+.approach{padding-bottom:44px}
+.learning{padding-top:62px}
+@media(max-width:760px){.approach{padding-bottom:34px}.learning{padding-top:50px}}

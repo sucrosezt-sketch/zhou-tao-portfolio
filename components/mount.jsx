@@ -21,19 +21,21 @@ initCarousel();initAmbient();initPointerAtmosphere();
 function Detail({front,back,label,structured=false}){
   const ref=useRef(null), [size,setSize]=useState({width:300,height:620}),[open,setOpen]=useState(false);
   useLayoutEffect(()=>{
+    const visual=ref.current.closest('.project')?.querySelector('.project-visual');
     const measure=()=>{
       const width=ref.current.clientWidth;
       const heights=[...ref.current.querySelectorAll('.measure-face')].map(el=>el.scrollHeight);
-      setSize({width,height:Math.ceil(Math.max(...heights))+2});
+      const pairedHeight=window.matchMedia('(min-width:1051px)').matches?(visual?.getBoundingClientRect().height||0):0;
+      const height=Math.max(Math.ceil(Math.max(...heights))+2,Math.ceil(pairedHeight));
+      setSize(previous=>previous.width===width&&previous.height===height?previous:{width,height});
     };
-    const observer=new ResizeObserver(measure); observer.observe(ref.current);measure();
+    const observer=new ResizeObserver(measure); observer.observe(ref.current);if(visual)observer.observe(visual);measure();
     document.fonts.ready.then(measure);return()=>observer.disconnect();
   },[]);
-  const markup=(html,isBack=false)=><div className={'detail-content'+(isBack&&structured?' detail-content--back':'')} dangerouslySetInnerHTML={{__html:html}}/>;
+  const markup=(html,isBack=false)=><div className={'detail-content'+(isBack&&structured?' detail-content--back':'')}><div className="detail-main" dangerouslySetInnerHTML={{__html:html}}/><div className="detail-card-footer" aria-hidden="true"><span>{isBack?'返回项目概览':label}</span><i>{isBack?'−':'＋'}</i></div></div>;
   return <div ref={ref} className="official-detail">
     <div className="measure-box" aria-hidden="true" inert><div className="measure-face">{markup(front)}</div><div className="measure-face">{markup(back,true)}</div></div>
     <FlipCard {...size} front={markup(front)} back={markup(back,true)} flipped={open} onFlipChange={setOpen} tiltMax={3} hoverScale={1.005} glareOpacity={.08} radius={12} background="#f4f4f4" color="#222222" shadowOpacity={.1} ariaLabel={open?'返回项目概览':label}/>
-    <button className="flip-toggle" type="button" aria-expanded={open} onClick={()=>setOpen(!open)}><span>{open?'返回项目概览':label}</span><i aria-hidden="true">{open?'−':'＋'}</i></button>
   </div>;
 }
 const projectBack={
@@ -90,5 +92,19 @@ document.querySelectorAll('.project-copy').forEach(copy=>{
   details.remove(); const front=copy.innerHTML;copy.innerHTML='';
   createRoot(copy).render(<Detail {...{front,back,label}} structured={Boolean(projectBack[id])}/>);
 });
-const method=document.querySelector('.method-details');
-if(method){const grid=document.querySelector('.method-grid');const front=grid.outerHTML.replace('reveal','visible');const label='维护、迁移与 Harness 实践';const back='<h3>'+label+'</h3>'+method.querySelector('.detail-body').innerHTML;const mount=document.createElement('div');grid.before(mount);grid.remove();method.remove();createRoot(mount).render(<Detail {...{front,back,label}}/>);}
+const methodCard=document.querySelector('.method-grid[aria-controls="method-drawer"]');
+const methodDrawer=document.getElementById('method-drawer');
+if(methodCard&&methodDrawer){
+  const toggleMethod=()=>{
+    const open=methodCard.getAttribute('aria-expanded')!=='true';
+    methodCard.setAttribute('aria-expanded',String(open));
+    methodCard.setAttribute('aria-label',`${open?'收起':'展开'}维护、迁移与 Harness 实践`);
+    methodDrawer.classList.toggle('is-open',open);
+    methodDrawer.setAttribute('aria-hidden',String(!open));
+    methodDrawer.inert=!open;
+  };
+  methodCard.addEventListener('click',toggleMethod);
+  methodCard.addEventListener('keydown',event=>{
+    if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleMethod();}
+  });
+}
