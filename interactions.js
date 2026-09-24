@@ -17,33 +17,64 @@ const productFrames=[
  ['viatrix-belt-detail.webp','腰部连接与束带'],
  ['viatrix-cushion-detail.webp','支撑垫与贴合细节']
 ].map(([file,title])=>({src:'assets/'+file,title,stamp:'PRODUCT'}));
-const gallery=document.querySelector('.frame-gallery');
-if(gallery){
- const stage=gallery.querySelector('.frame-stage'),layers=[...stage.querySelectorAll('.frame-layer')];
- const enlarge=gallery.querySelector('[data-image]');let current=0,requested=0,revision=0,set='film';
- const items=()=>set==='film'?frames:productFrames;
- function render(index){current=index;const list=items(),item=list[index];layers.forEach((layer,i)=>{const f=list[(index+2-i)%list.length];layer.querySelector('img').src=f.src;layer.querySelector('img').alt=i===2?f.title:'';});gallery.querySelector('.frame-time').textContent=item.stamp;gallery.querySelector('.frame-title').textContent=item.title;gallery.querySelector('.frame-count').textContent=String(index+1).padStart(2,'0')+' / '+String(list.length).padStart(2,'0');enlarge.dataset.image=item.src;enlarge.dataset.caption='VIATRIX · '+item.title;enlarge.textContent='放大当前图片 ↗';stage.setAttribute('aria-label',(set==='film'?'成片画面 ':'产品效果 ')+(index+1)+' / '+list.length+'，'+item.title+'，左右方向键切换');}
- async function move(delta){const list=items();requested=(requested+delta+list.length)%list.length;const target=requested,token=++revision;const preload=new Image();preload.src=list[target].src;try{await preload.decode();}catch{gallery.querySelector('.frame-title').textContent='图片暂未加载，请重试';return;}if(token!==revision)return;
- layers.forEach(l=>l.getAnimations().forEach(a=>a.cancel()));
- const outgoing=layers[2].animate([{transform:'translateX(0) rotate(0)',opacity:1},{transform:`translateX(${delta>0?-12:12}%) rotate(${delta>0?-4:4}deg)`,opacity:0}],{duration:160,easing:'ease-in'});
- try{await outgoing.finished;}catch{return;}if(token!==revision)return;render(target);outgoing.cancel();
- layers[2].animate([{transform:`translateX(${delta>0?8:-8}%) rotate(${delta>0?2:-2}deg)`,opacity:0},{transform:'translateX(0) rotate(0)',opacity:1}],{duration:360,easing:'cubic-bezier(.16,1,.3,1)'});
+function mountFrameGallery(gallery,{collections,initial,meta,notes,labels,name}){
+ const stage=gallery.querySelector('.frame-stage'),layers=[...stage.querySelectorAll('.frame-layer')],enlarge=gallery.querySelector('[data-image]');
+ let current=0,requested=0,revision=0,set=initial,start=null;
+ const items=()=>collections[set];
+ function render(index){
+  current=index;const list=items(),item=list[index];
+  layers.forEach((layer,i)=>{const frame=list[(index+2-i)%list.length],image=layer.querySelector('img');image.src=frame.src;image.alt=i===2?frame.title:'';});
+  gallery.querySelector('.frame-time').textContent=item.stamp;
+  gallery.querySelector('.frame-title').textContent=item.title;
+  gallery.querySelector('.frame-count').textContent=String(index+1).padStart(2,'0')+' / '+String(list.length).padStart(2,'0');
+  gallery.querySelectorAll('[data-prev],[data-next]').forEach(button=>button.disabled=list.length===1);
+  enlarge.dataset.image=item.src;enlarge.dataset.caption=name+' · '+item.title;
+  stage.setAttribute('aria-label',labels[set]+' '+(index+1)+' / '+list.length+'，'+item.title+'，左右方向键切换');
+  gallery.classList.toggle('show-product-frames',set==='product');
  }
- gallery.querySelector('[data-prev]').addEventListener('click',()=>move(-1));gallery.querySelector('[data-next]').addEventListener('click',()=>move(1));
- gallery.querySelectorAll('[data-frame-set]').forEach(button=>button.addEventListener('click',()=>{if(button.dataset.frameSet===set)return;set=button.dataset.frameSet;requested=0;revision++;layers.forEach(layer=>layer.getAnimations().forEach(animation=>animation.cancel()));gallery.querySelectorAll('[data-frame-set]').forEach(tab=>{const active=tab===button;tab.classList.toggle('is-active',active);tab.setAttribute('aria-pressed',String(active));});gallery.querySelector('.frame-meta').textContent=set==='film'?'111.27 SEC · 60 FPS':'PRODUCT / DETAILS';gallery.querySelector('.frame-note').textContent=set==='film'?'左右滑动或点击箭头切换 · 12 张关键帧取自最终成片。':'左右滑动或点击箭头切换 · 展示产品效果与结构细节。';render(0);gallery.classList.toggle('show-product-frames',set==='product');}));
- stage.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();move(e.key==='ArrowRight'?1:-1);}});
- let start=null;
- stage.addEventListener('pointerdown',e=>{if(e.button!==0)return;start={x:e.clientX,y:e.clientY,id:e.pointerId};stage.setPointerCapture(e.pointerId);});
- stage.addEventListener('pointerup',e=>{if(!start||start.id!==e.pointerId)return;const dx=e.clientX-start.x,dy=e.clientY-start.y;start=null;if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.3)move(dx<0?1:-1);});stage.addEventListener('pointercancel',()=>{start=null;});
+ async function move(delta){
+  const list=items();if(list.length===1)return;
+  requested=(requested+delta+list.length)%list.length;const target=requested,token=++revision;
+  const preload=new Image();preload.src=list[target].src;
+  try{await preload.decode();}catch{gallery.querySelector('.frame-title').textContent='图片暂未加载，请重试';return;}
+  if(token!==revision)return;
+  layers.forEach(layer=>layer.getAnimations().forEach(animation=>animation.cancel()));
+  const outgoing=layers[2].animate([{transform:'translateX(0) rotate(0)',opacity:1},{transform:`translateX(${delta>0?-12:12}%) rotate(${delta>0?-4:4}deg)`,opacity:0}],{duration:160,easing:'ease-in'});
+  try{await outgoing.finished;}catch{return;}
+  if(token!==revision)return;
+  render(target);outgoing.cancel();
+  layers[2].animate([{transform:`translateX(${delta>0?8:-8}%) rotate(${delta>0?2:-2}deg)`,opacity:0},{transform:'translateX(0) rotate(0)',opacity:1}],{duration:360,easing:'cubic-bezier(.16,1,.3,1)'});
+ }
+ gallery.querySelector('[data-prev]').addEventListener('click',()=>move(-1));
+ gallery.querySelector('[data-next]').addEventListener('click',()=>move(1));
+ gallery.querySelectorAll('[data-frame-set]').forEach(button=>button.addEventListener('click',()=>{
+  if(button.dataset.frameSet===set)return;
+  set=button.dataset.frameSet;requested=0;revision++;
+  layers.forEach(layer=>layer.getAnimations().forEach(animation=>animation.cancel()));
+  gallery.querySelectorAll('[data-frame-set]').forEach(tab=>{const active=tab===button;tab.classList.toggle('is-active',active);tab.setAttribute('aria-pressed',String(active));});
+  gallery.querySelector('.frame-meta').textContent=meta[set];
+  gallery.querySelector('.frame-note').textContent=notes[set];
+  render(0);
+ }));
+ stage.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();move(event.key==='ArrowRight'?1:-1);}});
+ stage.addEventListener('pointerdown',event=>{if(event.button!==0)return;start={x:event.clientX,y:event.clientY,id:event.pointerId};stage.setPointerCapture(event.pointerId);});
+ stage.addEventListener('pointerup',event=>{if(!start||start.id!==event.pointerId)return;const dx=event.clientX-start.x,dy=event.clientY-start.y;start=null;if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.3)move(dx<0?1:-1);});
+ stage.addEventListener('pointercancel',()=>{start=null;});
  render(0);
 }
-const fangcunGallery=document.querySelector('#fangcun .product-gallery');
-if(fangcunGallery){
- const pictures=[
-  ['fangcun-project.png','方案版面'],['fangcun-clay.webp','车身模型'],['fangcun-scene.webp','骑手与车辆场景'],['fangcun-side.webp','车身侧面效果'],['fangcun-rear.webp','配送箱后视效果'],['fangcun-storage.webp','储物结构展开效果']
- ];
- const button=fangcunGallery.querySelector('.zoom-image'),image=button.querySelector('img');let index=0,revision=0;
- async function show(next){const target=(next+pictures.length)%pictures.length,token=++revision;const [file,title]=pictures[target];const preload=new Image();preload.src='assets/'+file;try{await preload.decode();}catch{return;}if(token!==revision)return;index=target;image.classList.add('is-changing');image.src=preload.src;image.alt='方寸 · '+title;button.dataset.image='assets/'+file;button.dataset.caption='方寸 · '+title;button.setAttribute('aria-label','放大方寸 · '+title);fangcunGallery.querySelector('.product-gallery-kind').textContent=title;fangcunGallery.querySelector('.product-gallery-count').textContent=String(index+1).padStart(2,'0')+' / '+String(pictures.length).padStart(2,'0');requestAnimationFrame(()=>image.classList.remove('is-changing'));}
- fangcunGallery.querySelector('[data-product-prev]').addEventListener('click',()=>show(index-1));
- fangcunGallery.querySelector('[data-product-next]').addEventListener('click',()=>show(index+1));
-}
+const viatrixGallery=document.querySelector('#viatrix .frame-gallery');
+if(viatrixGallery)mountFrameGallery(viatrixGallery,{
+ collections:{film:frames,product:productFrames},initial:'film',name:'VIATRIX',
+ labels:{film:'成片画面',product:'产品效果'},
+ meta:{film:'111.27 SEC · 60 FPS',product:'PRODUCT / DETAILS'},
+ notes:{film:'左右滑动或点击箭头切换 · 12 张关键帧取自最终成片。',product:'左右滑动或点击箭头切换 · 展示产品效果与结构细节。'}
+});
+const fangcunGallery=document.querySelector('#fangcun .frame-gallery');
+if(fangcunGallery)mountFrameGallery(fangcunGallery,{
+ collections:{
+  product:[['fangcun-side.webp','车身侧面效果'],['fangcun-scene.webp','骑手与车辆场景'],['fangcun-storage.webp','储物结构展开效果'],['fangcun-rear.webp','配送箱后视效果'],['fangcun-clay.webp','车身模型']].map(([file,title])=>({src:'assets/'+file,title,stamp:'PRODUCT'})),
+  board:[{src:'assets/fangcun-project.png',title:'方案版面',stamp:'BOARD'}]
+ },initial:'product',name:'方寸',labels:{product:'产品效果',board:'方案版面'},
+ meta:{product:'PRODUCT / RENDERS',board:'DESIGN / BOARD'},
+ notes:{product:'左右滑动或点击箭头切换 · 点击放大当前图片。',board:'点击放大版面，可在查看器内缩放细节。'}
+});

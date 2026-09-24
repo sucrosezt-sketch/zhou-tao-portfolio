@@ -1,10 +1,15 @@
 'use strict';
 const menu = document.querySelector('.menu');
 const nav = document.querySelector('nav');
+const contactTrigger=document.querySelector('.contact-trigger');
+const contactDrawer=document.querySelector('#contact-drawer');
 function closeMenu(){nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-label','展开导航');}
-menu.addEventListener('click',()=>{const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'收起导航':'展开导航');});
-nav.addEventListener('click',e=>{if(e.target.closest('a'))closeMenu();});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
+function setContactOpen(open,returnFocus=false){contactDrawer.classList.toggle('is-open',open);contactDrawer.inert=!open;contactDrawer.setAttribute('aria-hidden',String(!open));contactTrigger.setAttribute('aria-expanded',String(open));if(!open&&returnFocus)(innerWidth<=760?menu:contactTrigger).focus();}
+menu.addEventListener('click',()=>{setContactOpen(false);const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'收起导航':'展开导航');});
+nav.addEventListener('click',e=>{if(e.target.closest('a')){closeMenu();setContactOpen(false);}});
+contactTrigger.addEventListener('click',()=>{const open=contactTrigger.getAttribute('aria-expanded')!=='true';closeMenu();setContactOpen(open);if(open&&innerWidth<=760)contactDrawer.querySelector('a').focus();});
+document.addEventListener('pointerdown',e=>{if(contactTrigger.getAttribute('aria-expanded')==='true'&&!contactTrigger.contains(e.target)&&!contactDrawer.contains(e.target))setContactOpen(false);});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(contactTrigger.getAttribute('aria-expanded')==='true')setContactOpen(false,true);closeMenu();}});
 if('IntersectionObserver' in window){
   document.documentElement.classList.add('motion-ready');
   const reveals = new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');reveals.unobserve(entry.target);}}),{threshold:0.08});
